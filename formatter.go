@@ -2,11 +2,12 @@
 package easy
 
 import (
+	"fmt"
+	"github.com/sirupsen/logrus"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -43,7 +44,18 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	level := strings.ToUpper(entry.Level.String())
 	output = strings.Replace(output, "%lvl%", level, 1)
+	fName := ""
+	line := "0"
+	function := ""
+	if entry.HasCaller() {
+		fName = filepath.Base(entry.Caller.File)
+		line = fmt.Sprintf("%v", entry.Caller.Line)
+		function = entry.Caller.Func.Name()
 
+	}
+	output = strings.Replace(output, "%file%", fName, 1)
+	output = strings.Replace(output, "%line%", line, 1)
+	output = strings.Replace(output, "%func%", function, 1)
 	for k, val := range entry.Data {
 		switch v := val.(type) {
 		case string:
